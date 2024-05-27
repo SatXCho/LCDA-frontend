@@ -15,11 +15,11 @@ export function VirusCamera({ navigation }) {
 
   useEffect(() => {
   requestGalleryPermission();
-}, []);
+  }, []);
 
-useEffect(() => {
-  fetchPhotos();
-}, []);
+  useEffect(() => {
+    fetchPhotos();
+    }, []);
 
   if (!permission) {
     // Camera permissions are still loading.

@@ -11,7 +11,7 @@ export function PhotoGallery({ route }) {
      margin: 1,
     },
     listProps:{
-      backgroundColor: "#4D6A6D"
+      backgroundColor: "#F5FCCF"
     }
   })
 
@@ -26,6 +26,3 @@ export function PhotoGallery({ route }) {
     />
   );
 }
-
-
-
