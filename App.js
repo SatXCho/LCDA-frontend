@@ -1,20 +1,68 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from "react-native";
+import { VirusCamera } from "./components/camera";
+import { LandingPage } from "./components/LandingPage";
+import { PhotoGallery } from "./components/PhotoGallery";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+
+
+
 
 export default function App() {
+  function LogoTitle() {
+    return (
+      <View style={styles.title}>
+        <Image
+          style={{ width: 50, height: 50 }}
+          source={require("./assets/icons/logo.png")}
+        />
+        <Text style= {styles.titleText}>LCD Virus Detection App</Text>
+      </View>
+    );
+  }
+
+  const Stack = createStackNavigator();
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="LandingPage"
+          component={LandingPage}
+          options={{
+            headerStyle: { backgroundColor: "#254441" },
+            headerTitle: (props) => <LogoTitle {...props} />,
+          }}
+        />
+        <Stack.Screen
+          name="VirusCamera"
+          component={VirusCamera}
+          options={{
+            headerStyle: { backgroundColor: "#254441" },
+            headerTitle: (props) => <LogoTitle {...props} />,
+          }}
+        />
+        <Stack.Screen
+          name="PhotoGallery"
+          component={PhotoGallery}
+          options={{
+            headerStyle: { backgroundColor: "#254441" },
+            headerTitle: (props) => <LogoTitle {...props} />,
+          }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+  title: {
+    flexDirection: "row",
+    alignItems: "center",
+    color: "white",
   },
+  titleText: {
+    fontSize: 18,
+    color: "white",
+    fontWeight: "bold",
+  }
 });
