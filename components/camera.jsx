@@ -3,15 +3,11 @@ import * as MediaLibrary from 'expo-media-library'
 import { useRef, useState, useEffect } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 
-
-
 export function VirusCamera({ navigation }) {
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef(null);
   const [photos, setPhotos] = useState([]);
-
-  
 
   useEffect(() => {
   requestGalleryPermission();
