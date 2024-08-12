@@ -1,21 +1,30 @@
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import * as MediaLibrary from 'expo-media-library'
-import { useRef, useState, useEffect } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
+import { CameraView, useCameraPermissions } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
+import { useRef, useState, useEffect } from "react";
+import {
+  Button,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Image,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 export function VirusCamera({ navigation }) {
-  const [facing, setFacing] = useState('back');
+  const [facing, setFacing] = useState("back");
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef(null);
   const [photos, setPhotos] = useState([]);
 
   useEffect(() => {
-  requestGalleryPermission();
+    requestGalleryPermission();
   }, []);
 
   useEffect(() => {
     fetchPhotos();
-    }, []);
+  }, []);
 
   if (!permission) {
     // Camera permissions are still loading.
@@ -26,69 +35,131 @@ export function VirusCamera({ navigation }) {
     // Camera permissions are not granted yet.
     return (
       <View style={styles.container}>
-        <Text style={{ textAlign: 'center', color: 'white', margin: 5 }}>LCDVirus app would like to use your camera</Text>
+        <Text style={{ textAlign: "center", color: "white", margin: 5 }}>
+          LCDVirus app would like to use your camera
+        </Text>
         <Button onPress={requestPermission} title="Allow Camera" />
       </View>
     );
   }
 
   function toggleCameraFacing() {
-    setFacing(current => (current === 'back' ? 'front' : 'back'));
+    setFacing((current) => (current === "back" ? "front" : "back"));
   }
 
   async function requestGalleryPermission() {
-  const { status } = await MediaLibrary.requestPermissionsAsync();
-  if (status !== 'granted') {
-    alert('LCDVirus App needs access to your gallery');
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+    if (status !== "granted") {
+      alert("LCDVirus App needs access to your gallery");
+    }
   }
-}
+
+    async function uploadImage(uri) {
+      // const formData = new FormData();
+      // formData.append("image", {
+      //   uri: uri,
+      //   type: "image/jpeg",
+      //   name: "photo.jpg",
+      // });
+
+      // try {
+      //   const response = await fetch(
+      //     "http://192.168.29.187:8081/predict",
+      //     {
+      //       method: "POST",
+      //       body: formData,
+      //       headers: {
+      //         "Content-Type": "multipart/form-data",
+      //       },
+      //     }
+      //   );
+      //   const result = await response.json();
+      //   console.log("Upload success:", result);
+      // } catch (error) {
+      //   console.error("Upload error:", error);
+      // }
+      return {
+        prediction: "Infected",
+        success: true,
+      };
+    }
+
 
   async function takePictureAndSave() {
     if (cameraRef.current) {
       const options = { quality: 0.5, base64: true };
       const data = await cameraRef.current.takePictureAsync(options);
+
       const asset = await MediaLibrary.createAssetAsync(data.uri);
-      await MediaLibrary.createAlbumAsync('LCDVirus App', asset, false);
+      await MediaLibrary.createAlbumAsync("LCDVirus App", asset, false);
+      const { prediction, success } = await uploadImage(data.uri);
+
+      // Save data to AsyncStorage
+      try {
+        const newPhoto = {
+          id: Date.now().toString(),
+          title: `Photo ${Date.now()}`,
+          prediction: prediction,
+          imageUri: data.uri,
+        };
+        
+        const existingData = await AsyncStorage.getItem("photoData");
+        let photoArray = existingData ? JSON.parse(existingData) : [];
+        photoArray.unshift(newPhoto);
+
+        await AsyncStorage.setItem("photoData", JSON.stringify(photoArray));
+      } catch (error) {
+        console.error("Error saving to AsyncStorage:", error);
+      }
+
       fetchPhotos();
+      navigation.navigate("LandingPage");
     }
   }
 
   async function fetchPhotos() {
-  const album = await MediaLibrary.getAlbumAsync('LCDVirus App');
-  if (album) {
-    const photos = await MediaLibrary.getAssetsAsync({ album: album });
-    setPhotos(photos.assets);
+    const album = await MediaLibrary.getAlbumAsync("LCDVirus App");
+    if (album) {
+      const photos = await MediaLibrary.getAssetsAsync({ album: album });
+      setPhotos(photos.assets);
+    }
   }
-}
 
   return (
     <View style={styles.container}>
       <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button2} onPress={() => navigation.navigate('PhotoGallery', { photos: photos })}>
+          <TouchableOpacity
+            style={styles.button2}
+            onPress={() =>
+              navigation.navigate("PhotoGallery", { photos: photos })
+            }
+          >
             <Image
-            style = {styles.sideicon}
+              style={styles.sideicon}
               source={require("../assets/icons/PhotoLibrary.png")}
             />
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={takePictureAndSave}>
             <Image
-            style = {styles.camicon}
+              style={styles.camicon}
               source={require("../assets/icons/CamIcon.png")}
             />
           </TouchableOpacity>
           <TouchableOpacity style={styles.button3} onPress={toggleCameraFacing}>
             <Image
-            style = {styles.sideicon}
+              style={styles.sideicon}
               source={require("../assets/icons/FlipCam.png")}
             />
           </TouchableOpacity>
         </View>
         <View style={styles.bottomView}>
-          <TouchableOpacity  onPress={() => navigation.navigate('LandingPage', { photos: photos })}>
-          <Text style={styles.bottomViewText}>
-            Home
-          </Text>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("LandingPage", { photos: photos })
+            }
+          >
+            <Text style={styles.bottomViewText}>Home</Text>
           </TouchableOpacity>
         </View>
       </CameraView>
@@ -99,21 +170,20 @@ export function VirusCamera({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    width: '100%',
+    justifyContent: "center",
+    width: "100%",
   },
   camera: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonContainer: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: "row",
     alignItems: "flex-end",
     width: "100%",
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     justifyContent: "space-between",
-    
   },
   button: {
     flex: 1,
@@ -138,29 +208,29 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
   camicon: {
     height: 90,
-    width: 90
+    width: 90,
   },
   sideicon: {
     height: 45,
-    width: 45
+    width: 45,
   },
   bottomView: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
     height: 200,
-    backgroundColor: 'rgba(16, 31, 29, 0.8)',
+    backgroundColor: "rgba(16, 31, 29, 0.8)",
   },
   bottomViewText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
     margin: 10,
-  }
+  },
 });
