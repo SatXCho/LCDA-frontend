@@ -55,33 +55,31 @@ export function VirusCamera({ navigation }) {
   }
 
     async function uploadImage(uri) {
-      // const formData = new FormData();
-      // formData.append("image", {
-      //   uri: uri,
-      //   type: "image/jpeg",
-      //   name: "photo.jpg",
-      // });
+      const formData = new FormData();
+      formData.append("image", {
+        uri: uri,
+        type: "image/jpeg",
+        name: "photo.jpg",
+      });
+      let result = {};
 
-      // try {
-      //   const response = await fetch(
-      //     "http://192.168.29.187:8081/predict",
-      //     {
-      //       method: "POST",
-      //       body: formData,
-      //       headers: {
-      //         "Content-Type": "multipart/form-data",
-      //       },
-      //     }
-      //   );
-      //   const result = await response.json();
-      //   console.log("Upload success:", result);
-      // } catch (error) {
-      //   console.error("Upload error:", error);
-      // }
-      return {
-        prediction: "Infected",
-        success: true,
-      };
+      try {
+        const response = await fetch(
+          "https://lcda-backend.onrender.com/predict",
+          {
+            method: "POST",
+            body: formData,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        result = await response.json();
+        console.log("Upload success:", result);
+      } catch (error) {
+        console.error("Upload error:", error);
+      }
+      return result;
     }
 
 
