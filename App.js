@@ -5,9 +5,6 @@ import { PhotoGallery } from "./components/PhotoGallery";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
-
-
-
 export default function App() {
   function LogoTitle() {
     return (
